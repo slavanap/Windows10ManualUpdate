@@ -36,6 +36,27 @@ namespace w10mu {
     class UpdateItem {
         dynamic _update;
 
+        int GetSizeOrder(decimal size) {
+            int order;
+            for (order = 0; size > 1024; ++order) {
+                size /= 1024;
+            }
+            return order;
+        }
+
+        string SizeToString(decimal size, int order, bool addsuffix) {
+            string fmt;
+            switch (order) {
+                case 0: fmt = "{0} B"; break;
+                case 1: fmt = "{0} KB"; size /= 1024; break;
+                case 2: fmt = "{0} MB"; size /= 1024 * 1024; break;
+                default: fmt = "{0} GB"; size /= 1024 * 1024 * 1024; break;
+            }
+            return addsuffix
+                ? string.Format(fmt, (int)size)
+                : ((int)size).ToString();
+        }
+
         public UpdateItem(dynamic update) {
             _update = update;
 
@@ -47,7 +68,7 @@ namespace w10mu {
                 sb.Append("[REQUIRE USER INPUT] ");
             if (EulaAccepted == false)
                 sb.Append("[EULA NOT ACCEPTED] ");
-            sb.AppendFormat("{0}\n", Title);
+            sb.AppendFormat("{0}\n", _update.Title);
             if (_update.Description != null)
                 sb.AppendFormat("{0}\n", _update.Description);
             if (_update.MoreInfoUrls != null && _update.MoreInfoUrls.Count > 0) {
@@ -56,9 +77,11 @@ namespace w10mu {
                     sb.AppendFormat("{0}\n", _update.MoreInfoUrls.Item(i));
             }
             if (_update.EulaText != null)
-                sb.AppendFormat("EULA TEXT:\n{0}\n", _update.EulaText);
+                sb.AppendFormat("EULA TEXT:\n{0}\n\n", _update.EulaText);
+            if (_update.ReleaseNotes != null)
+                sb.AppendFormat("Release Notes:\n{0}\n\n", _update.ReleaseNotes);
 
-            dynamic bundle = _update.BundledUpdates;
+                dynamic bundle = _update.BundledUpdates;
             if (bundle != null && bundle.Count > 0) {
                 sb.AppendFormat("This update contains {0} packages:\n", bundle.Count);
                 for (int i = 0; i < bundle.Count; ++i) {
@@ -69,11 +92,26 @@ namespace w10mu {
                 }
             }
 
+            decimal minSize = _update.MinDownloadSize;
+            decimal maxSize = _update.MaxDownloadSize;
+            string sizeString;
+            if (minSize == 0 || minSize == maxSize) {
+                sizeString = SizeToString(maxSize, GetSizeOrder(maxSize), true);
+            }
+            else {
+                int order = Math.Max(GetSizeOrder(minSize), GetSizeOrder(maxSize));
+                sizeString = string.Format("{0} - {1}",
+                    SizeToString(minSize, order, false),
+                    SizeToString(maxSize, order, true)
+                );
+            }
+            Title = string.Format("{0} ({1})", _update.Title, sizeString);
+
             Description = sb.ToString();
         }
 
         public bool IsChecked { get; set; }
-        public string Title { get { return _update.Title; } }
+        public string Title { get; }
         public string Description { get; }
         //public bool IsHidden { get; set; }
 
@@ -182,7 +220,7 @@ namespace w10mu {
                         var sb = new StringBuilder();
                         if (installationResult.RebootRequired == true)
                             sb.Append("[REBOOT REQUIRED] ");
-                        sb.AppendFormat("Code: {0}", installationResult.ResultCode);
+                        sb.AppendFormat("Code: {0}\n", installationResult.ResultCode);
                         sb.Append("Listing of updates installed:\n");
                         for (int i = 0; i < updatesToInstall.Count; ++i) {
                             sb.AppendFormat("{0} : {1}\n",
