@@ -137,7 +137,7 @@ namespace w10mu {
         async Task SearchForUpdates() {
             _status.Text = "Searching for updates...";
             await Task.Run(() => {
-                _searchResult = _updateSearcher.Search("IsInstalled=0 and Type='Software' and IsHidden=0");
+                _searchResult = _updateSearcher.Search("IsInstalled=0");
             });
             _status.Text = "Search completed.";
             var list = new List<UpdateItem>();
