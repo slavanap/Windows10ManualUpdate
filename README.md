@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/c86j63q3hm64fb46?svg=true)](https://ci.appveyor.com/project/slavanap/windows10manualupdate)
+
 # Install Windows Updates in Windows 10 manually
 
 Note, this method *may not work* properly in Windows 10 Home.

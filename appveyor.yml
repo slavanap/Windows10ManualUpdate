@@ -1,0 +1,12 @@
+image: Visual Studio 2017
+
+configuration: Release
+platform: Any CPU
+
+build:
+  project: w10mu.sln
+
+test: off
+
+artifacts:
+  - path: bin\$(configuration)\w10mu.exe
