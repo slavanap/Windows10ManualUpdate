@@ -64,8 +64,6 @@ namespace w10mu {
             IsChecked = _update.IsMandatory;
 
             var sb = new StringBuilder();
-            if (RequireUserInput)
-                sb.Append("[REQUIRE USER INPUT] ");
             if (EulaAccepted == false)
                 sb.Append("[EULA NOT ACCEPTED] ");
             sb.AppendFormat("{0}\n", _update.Title);
@@ -116,7 +114,6 @@ namespace w10mu {
         //public bool IsHidden { get; set; }
 
         public dynamic Update { get { return _update; } }
-        public bool RequireUserInput { get { return _update.InstallationBehavior.CanRequestUserInput; } }
         public bool EulaAccepted { get { return _update.EulaAccepted; } }
 
         public Brush Background {
@@ -181,8 +178,6 @@ namespace w10mu {
                 dynamic updatesToInstall = Activator.CreateInstance(Type.GetTypeFromProgID("Microsoft.Update.UpdateColl"));
                 foreach (var item in list) {
                     if (!item.IsChecked)
-                        continue;
-                    if (item.RequireUserInput)
                         continue;
                     if (!item.EulaAccepted) {
                         if (MessageBox.Show(this, item.Update.EulaText, "Do you accept this license agreement?", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
