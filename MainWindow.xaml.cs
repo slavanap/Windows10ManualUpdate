@@ -34,7 +34,7 @@ using System.Windows.Media;
 namespace w10mu {
 
     class UpdateItem {
-        dynamic _update;
+        readonly dynamic _update;
 
         int GetSizeOrder(decimal size) {
             int order;
@@ -111,7 +111,6 @@ namespace w10mu {
         public bool IsChecked { get; set; }
         public string Title { get; }
         public string Description { get; }
-        //public bool IsHidden { get; set; }
 
         public dynamic Update { get { return _update; } }
         public bool EulaAccepted { get { return _update.EulaAccepted; } }
@@ -195,16 +194,7 @@ namespace w10mu {
                     downloader.Updates = updatesToInstall;
                     await Task.Run(() => { downloader.Download(); });
 
-                    bool rebootMayBeRequired = false;
-                    for (int i = 0; i < updatesToInstall.Count; ++i)
-                        if (updatesToInstall.Item(i).InstallationBehavior.RebootBehavior > 0)
-                            rebootMayBeRequired = true;
-
-                    string warnText = rebootMayBeRequired
-                        ? "These updates may require a reboot."
-                        : "Installation ready.";
-
-                    if (MessageBox.Show(this, warnText + " Continue?", "Notice", MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+                    if (MessageBox.Show(this, "Installation ready. Continue?", "Notice", MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
                         _status.Text = "Installing updates...";
 
                         dynamic installer = _updateSession.CreateUpdateInstaller();
